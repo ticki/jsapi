@@ -12,5 +12,6 @@
 pub mod dom;
 pub mod ffi;
 pub mod local_storage;
+pub mod location;
 pub mod prelude;
 pub mod string;
