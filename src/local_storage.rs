@@ -5,7 +5,7 @@ use prelude::*;
 /// Get the value of some key in the local storage (`localStorage`).
 ///
 /// It consumes the key and uses the allocation of the key to store the return value.
-fn get(key: &JsString) -> JsString {
+pub fn get(key: &JsString) -> JsString {
     let ret = JsString::new("");
 
     unsafe {
@@ -20,7 +20,7 @@ fn get(key: &JsString) -> JsString {
 /// Set the value of some key in the local storage (`localStorage`).
 ///
 /// Return the old value.
-fn set(key: &JsString, val: &JsString) -> JsString {
+pub fn set(key: &JsString, val: &JsString) -> JsString {
     let ret = JsString::new("");
 
     unsafe {
