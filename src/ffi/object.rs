@@ -1,5 +1,7 @@
 //! A simple allocator for typed JavaScript objects.
 
+use ffi::Int;
+
 /// Initialize the typed arena if not already initialized.
 fn arena_init() {
     unsafe {
@@ -11,10 +13,27 @@ fn arena_init() {
     }
 }
 
+/// Allocate an object into the `jsObjects` global array.
+fn alloc() -> Int {
+    let ret;
+
+    arena_init();
+    unsafe {
+        asm!("\
+        var $0=jsObjectsFree.pop()\
+        if(!$0){\
+            $0=jsObjects.len();\
+            jsObjects.push(null);\
+        }" : "=r"(ret));
+    }
+
+    ret
+}
+
 /// An opaque pointer into some JavaScript-typed object.
 pub struct Object {
     /// The index of the `jsObjects` array this pointer refers to.
-    id: usize,
+    id: Int,
 }
 
 impl Object {
@@ -22,25 +41,15 @@ impl Object {
     ///
     /// The initial value is `null`.
     fn new() -> Object {
-        let ret;
-
-        arena_init();
-        unsafe {
-            asm!("\
-            var $0=jsObjectsFree.pop()\
-            if(!$0){\
-                $0=jsObjects.len();\
-                jsObjects.push(null);\
-            }" : "=r"(ret));
+        Object {
+            id: alloc(),
         }
-
-        ret
     }
 
     /// Get the identifier of this object.
     ///
     /// To access the object in JavaScript code, you do `jsObjects[id]`.
-    fn get_id(&self) -> usize {
+    fn get_id(&self) -> Int {
         self.id
     }
 }
