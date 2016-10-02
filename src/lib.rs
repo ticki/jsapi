@@ -14,5 +14,6 @@ pub mod ffi;
 pub mod local_storage;
 pub mod location;
 pub mod log;
+pub mod navigator;
 pub mod prelude;
 pub mod string;

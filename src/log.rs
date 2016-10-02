@@ -1,3 +1,5 @@
+//! Logging to the JavaScript consoles and other integrated targets.
+
 /// Issue an error log message.
 pub fn error(msg: &JsString) {
     unsafe {
