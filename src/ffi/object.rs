@@ -12,7 +12,6 @@ fn arena_init() {
 }
 
 /// An opaque pointer into some JavaScript-typed object.
-#[derive(Copy, Clone)]
 pub struct Object {
     /// The index of the `jsObjects` array this pointer refers to.
     id: usize,
@@ -41,7 +40,7 @@ impl Object {
     /// Get the identifier of this object.
     ///
     /// To access the object in JavaScript code, you do `jsObjects[id]`.
-    fn get_id(self) -> usize {
+    fn get_id(&self) -> usize {
         self.id
     }
 }
