@@ -3,7 +3,7 @@
 use prelude::*;
 
 /// The integer type of JavaScript.
-type Int = u32;
+pub type Int = u32;
 
 pub mod object;
 

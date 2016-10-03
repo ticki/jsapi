@@ -1,5 +1,7 @@
 //! Logging to the JavaScript consoles and other integrated targets.
 
+use prelude::*;
+
 /// Issue an error log message.
 pub fn error(msg: &JsString) {
     unsafe {

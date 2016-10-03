@@ -20,10 +20,10 @@ fn alloc() -> Int {
     arena_init();
     unsafe {
         asm!("\
-        var $0=ObjectPoolFree.pop()\
+        var $0=__ObjectPoolFree.pop()\
         if(!$0){\
-            $0=ObjectPool.len();\
-            ObjectPool.push(null);\
+            $0=__ObjectPool.len();\
+            __ObjectPool.push(null);\
         }" : "=r"(ret));
     }
 
@@ -40,7 +40,7 @@ impl Object {
     /// Allocate a new object.
     ///
     /// The initial value is `null`.
-    fn new() -> Object {
+    pub fn new() -> Object {
         Object {
             id: alloc(),
         }
@@ -49,14 +49,29 @@ impl Object {
     /// Get the identifier of this object.
     ///
     /// To access the object in JavaScript code, you do `ObjectPool[id]`.
-    fn get_id(&self) -> Int {
+    pub fn get_id(&self) -> Int {
         self.id
+    }
+
+    /// Is this object null?
+    pub fn is_null(&self) -> bool {
+        let ret;
+
+        unsafe {
+            asm!("$0=__ObjectPool[$1]===null"
+                 : "=r"(ret)
+                 : "r"(self.id));
+        }
+
+        ret
     }
 }
 
 impl Drop for Object {
     fn drop(&mut self) {
-        asm!("delete ObjectPool[$0];\
-              ObjectPoolFree.push($0)" :: "r"(self.id));
+        unsafe {
+            asm!("delete __ObjectPool[$0];\
+                  __ObjectPoolFree.push($0)" :: "r"(self.id));
+        }
     }
 }

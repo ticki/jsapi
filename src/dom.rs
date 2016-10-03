@@ -17,12 +17,14 @@ impl Element {
 
         unsafe {
             asm!("__ObjectPool[$0]=document.getElementFromId(__ObjectPool[$1])"
-                 : "r"(obj.get_id()),
-                   "r"(id.get_inner_object().get_id()))
+                 :: "r"(obj.get_id()),
+                    "r"(id.get_inner_object().get_id()))
         }
 
-        Element {
-            obj: obj,
+        if obj.is_null() { None } else {
+            Some(Element {
+                obj: obj,
+            })
         }
     }
 
@@ -46,8 +48,8 @@ impl Element {
         unsafe {
             asm!("__ObjectPool[$0].style[__ObjectPool[$1]]=__ObjectPool[$2]"
                  :: "r"(self.obj.get_id()),
-                    "r"(key.get_inner_object().get_id(),
-                    "r"(val.get_inner_object().get_id())));
+                    "r"(key.get_inner_object().get_id()),
+                    "r"(val.get_inner_object().get_id()));
         }
     }
 

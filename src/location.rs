@@ -4,13 +4,17 @@ use prelude::*;
 
 /// Goto some specified destination.
 pub fn goto(href: &JsString) {
-    asm!("location.href=__ObjectPool[$0]"
-         :: "r"(href.get_inner_object().get_id()));
+    unsafe {
+        asm!("location.href=__ObjectPool[$0]"
+             :: "r"(href.get_inner_object().get_id()));
+    }
 }
 
 /// Reload the page.
 pub fn reload() {
-    asm!("location.reload()");
+    unsafe {
+        asm!("location.reload()");
+    }
 }
 
 /// Get the full hyperreference (URL) to the current page.

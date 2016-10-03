@@ -9,6 +9,8 @@
 //! Obviously, this is an incredibly hacky solution, but it's deeply rooted in the flawed design of
 //! JavaScript.
 
+#![feature(asm, conservative_impl_trait, try_from)]
+
 pub mod dom;
 pub mod ffi;
 pub mod local_storage;

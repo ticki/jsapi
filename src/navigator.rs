@@ -1,12 +1,16 @@
+//! Bindings to the `Navigator` object.
+
+use prelude::*;
+
 /// An user agent identifier.
-struct UserAgent {
+pub struct UserAgent {
     /// The textual representation of the user agent.
     string: String,
 }
 
 impl UserAgent {
     /// Get the user agent of the browser.
-    pub fn get() -> JsString {
+    pub fn get() -> UserAgent {
         let string = JsString::new("");
 
         unsafe {
@@ -85,7 +89,7 @@ pub fn cookies_enabled() -> bool {
 
     unsafe {
         asm!("$0=navigator.cookiesEnabled"
-             :: "r"(ret));
+             : "=r"(ret));
     }
 
     ret

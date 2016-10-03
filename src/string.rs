@@ -1,6 +1,7 @@
 //! Native JavaScript strings.
 
-use std::{ops, iter, cmp};
+use std::cmp;
+use std::convert::TryFrom;
 
 use prelude::*;
 
@@ -19,7 +20,9 @@ impl JsString {
         // Load the string into the object.
         unsafe {
             asm!("__ObjectPool[$0]=Pointer_stringify($1,$2)"
-                 :: "r"(self.obj.get_id()), "r"(s.as_ptr()), "r"(len.len()));
+                 :: "r"(obj.get_id()),
+                    "r"(s.as_ptr()),
+                    "r"(s.len()));
         }
 
         JsString {
@@ -59,24 +62,23 @@ impl JsString {
     /// This cannot be implemented through the `Index` trait due to the individual characters not
     /// being addressable.
     pub fn nth(&self, n: Int) -> Option<char> {
-        if n < self.len() {
-            None
-        } else {
-            let code;
+        let code: Int;
 
-            unsafe {
-                asm!("$0=__ObjectPool[$1].charCodeAt($2)"
-                     : "=r"(code)
-                     : "r"(self.obj.get_id()), "r"(n));
-            }
-
-            Some(code as char)
+        unsafe {
+            asm!("$0=__ObjectPool[$1].charCodeAt($2)"
+                 : "=r"(code)
+                 : "r"(self.obj.get_id()), "r"(n));
         }
+
+        char::try_from(code).ok()
     }
 
     /// Get an iterator of the characters of this string.
-    pub fn chars(&self) -> impl Iterator<Item = char> {
-        (0..).filter_map(|x| self.nth(x))
+    pub fn chars(&self) -> Iter {
+        Iter {
+            string: self,
+            n: 0,
+        }
     }
 
     /// Get the inner object object of this string.
@@ -93,6 +95,12 @@ impl<'a> Into<String> for &'a JsString {
         string.extend(self.chars());
 
         string
+    }
+}
+
+impl Into<String> for JsString {
+    fn into(self) -> String {
+        (&self).into()
     }
 }
 
@@ -117,11 +125,30 @@ impl Clone for JsString {
 impl cmp::PartialEq for JsString {
     fn eq(&self, other: &JsString) -> bool {
         let ret;
-        asm!("$0=$1===$2"
-             : "=r"(ret)
-             : "r"(self.obj.get_id()), "r"(other.obj.get_id()));
+
+        unsafe {
+            asm!("$0=$1===$2"
+                 : "=r"(ret)
+                 : "r"(self.obj.get_id()), "r"(other.obj.get_id()));
+        }
+
         ret
     }
 }
 
 impl cmp::Eq for JsString {}
+
+pub struct Iter<'a> {
+    string: &'a JsString,
+    n: Int,
+}
+
+impl<'a> Iterator for Iter<'a> {
+    type Item = char;
+
+    fn next(&mut self) -> Option<char> {
+        let ret = self.string.nth(self.n);
+        self.n += 1;
+        ret
+    }
+}
